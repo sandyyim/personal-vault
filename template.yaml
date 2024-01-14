@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Example of processing messages on Lambda
+Resources:
+  PersonalVault:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Runtime: go1.x
+      Handler: main
+      Events:
+        # MySQSEvent:
+        #   Type: SQS
+        #   Properties:
+        #     Queue: !GetAtt MySqsQueue.Arn
+  #       #     BatchSize: 10
+  # MySqsQueue:
+  #   Type: AWS::SQS::Queue
