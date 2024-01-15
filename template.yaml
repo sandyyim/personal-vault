@@ -9,10 +9,10 @@ Resources:
       Runtime: go1.x
       Handler: main
       Events:
-        # MySQSEvent:
-        #   Type: SQS
-        #   Properties:
-        #     Queue: !GetAtt MySqsQueue.Arn
-  #       #     BatchSize: 10
+        Healthcheck:
+          Type: Api
+          Properties:
+            Path: /healthcheck
+            Method: get
   # MySqsQueue:
   #   Type: AWS::SQS::Queue
