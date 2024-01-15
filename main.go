@@ -2,28 +2,43 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
+	"github.com/gin-gonic/gin"
 )
 
-type MyEvent struct {
-	Name string `json:"What is your name?"`
-	Age  int    `json:"How old are you?"`
+var ginLambda *ginadapter.GinLambda
+
+func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return ginLambda.ProxyWithContext(ctx, request)
 }
 
-type MyResponse struct {
-	Message string `json:"Answer"`
+func healthcheckHandler(c *gin.Context) {
+	c.String(http.StatusOK, "Hello World!")
 }
 
-func HandleRequest(ctx context.Context, event *MyEvent) (*string, error) {
-	if event == nil {
-		return nil, fmt.Errorf("received nil event")
-	}
-	message := fmt.Sprintf("Hello %s!", event.Name)
-	return &message, nil
+func notFoundHandler(c *gin.Context) {
+	c.JSON(http.StatusNotFound, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+}
+
+func notMethodHandler(c *gin.Context) {
+	c.JSON(http.StatusMethodNotAllowed, gin.H{"code": "METHOD_NOT_ALLOWED", "message": "405 method not allowed"})
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	router := gin.Default()
+	router.GET("/healthcheck", healthcheckHandler)
+
+	// router.POST("/os", func(c *gin.Context) {
+	// 	c.String(200, runtime.GOOS)
+	// })
+
+	router.NoRoute(notFoundHandler)
+	router.NoMethod(notMethodHandler)
+
+	ginLambda = ginadapter.New(router)
+	lambda.Start(Handler)
 }
