@@ -14,5 +14,7 @@ Resources:
           Properties:
             Path: /healthcheck
             Method: get
+            Path: /save
+            Method: post
   # MySqsQueue:
   #   Type: AWS::SQS::Queue
