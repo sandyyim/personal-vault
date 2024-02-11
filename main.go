@@ -3,9 +3,13 @@ package main
 import (
 	"context"
 	"net/http"
+	"personal-vault/internal/db"
+	"personal-vault/internal/vault"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/gin-gonic/gin"
 )
@@ -29,12 +33,22 @@ func notMethodHandler(c *gin.Context) {
 }
 
 func main() {
+
+	awsConfig, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		return
+	}
+
+	svc := dynamodb.NewFromConfig(awsConfig)
+	dbClient := db.NewClient(context.Background(), svc)
+
+	saveHandler := vault.SaveHandler{Client: *dbClient}
+
 	router := gin.Default()
+
 	router.GET("/healthcheck", healthcheckHandler)
 
-	// router.POST("/os", func(c *gin.Context) {
-	// 	c.String(200, runtime.GOOS)
-	// })
+	router.POST("/save", saveHandler.ServeHTTP)
 
 	router.NoRoute(notFoundHandler)
 	router.NoMethod(notMethodHandler)
