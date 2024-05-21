@@ -40,15 +40,18 @@ func main() {
 	}
 
 	svc := dynamodb.NewFromConfig(awsConfig)
-	dbClient := db.NewClient(context.Background(), svc)
+	dbClient := db.NewClient(svc)
 
 	saveHandler := vault.SaveHandler{Client: *dbClient}
+	retrieveHandler := vault.RetrieveHandler{Client: *dbClient}
 
 	router := gin.Default()
 
 	router.GET("/healthcheck", healthcheckHandler)
 
 	router.POST("/save", saveHandler.ServeHTTP)
+
+	router.POST("/getall", retrieveHandler.ServeHTTP)
 
 	router.NoRoute(notFoundHandler)
 	router.NoMethod(notMethodHandler)
