@@ -1,8 +1,10 @@
 package vault
 
 import (
+	"fmt"
 	"github.com/google/uuid"
 	"log"
+	"log/slog"
 	"net/http"
 	"personal-vault/internal/db"
 
@@ -19,7 +21,8 @@ type Request struct {
 }
 
 func (h SaveHandler) ServeHTTP(c *gin.Context) {
-	log.Println("enter save")
+	slog.Info("enter save")
+
 	var request Request
 
 	// call BindJSON to bind the received JSON to request
@@ -27,9 +30,6 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-
-	// validation
-	// validation
 
 	id := uuid.NewString()
 
@@ -46,6 +46,8 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 		return
 	}
 
+	response := fmt.Sprintf("path: %s", id)
+
 	// return success/error
-	c.IndentedJSON(http.StatusCreated, id)
+	c.IndentedJSON(http.StatusCreated, response)
 }
