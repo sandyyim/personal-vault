@@ -2,9 +2,11 @@ package db
 
 import (
 	"context"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"log"
 	"log/slog"
 )
@@ -68,4 +70,34 @@ func (dbClient DynamoDBClient) ScanItems(ctx context.Context) ([]VaultMetadata, 
 	}
 
 	return metadatas, err
+}
+
+func (dbClient DynamoDBClient) GetItem(ctx context.Context, id string) (string, error) {
+	input := &dynamodb.GetItemInput{
+		TableName: aws.String(tableName),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: id},
+		},
+	}
+
+	output, err := dbClient.API.GetItem(ctx, input)
+	if err != nil {
+		slog.Error("error", err)
+		return "", err
+	}
+
+	if output.Item == nil {
+		slog.Error("error", err)
+		return "", errors.New("unable to find the record")
+	}
+
+	item := VaultEntity{}
+
+	err = attributevalue.UnmarshalMap(output.Item, &item)
+	if err != nil {
+		slog.Error("error", err)
+		return "", err
+	}
+
+	return item.Secret, err
 }

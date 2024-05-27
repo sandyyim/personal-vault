@@ -43,7 +43,8 @@ func main() {
 	dbClient := db.NewClient(svc)
 
 	saveHandler := vault.SaveHandler{Client: *dbClient}
-	retrieveHandler := vault.RetrieveHandler{Client: *dbClient}
+	scanHandler := vault.ScanHandler{Client: *dbClient}
+	getHandler := vault.GetHandler{Client: *dbClient}
 
 	router := gin.Default()
 
@@ -51,7 +52,9 @@ func main() {
 
 	router.POST("/save", saveHandler.ServeHTTP)
 
-	router.POST("/getall", retrieveHandler.ServeHTTP)
+	router.POST("/getall", scanHandler.ServeHTTP)
+
+	router.POST("/get", getHandler.ServeHTTP)
 
 	router.NoRoute(notFoundHandler)
 	router.NoMethod(notMethodHandler)
