@@ -11,3 +11,15 @@ build-zip:
 	GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap main.go
 	sleep 3
 	zip bootstrap.zip bootstrap
+
+
+aws dynamodb create-table \
+  --table-name personal-vault-dynamodb \
+  --attribute-definitions \
+      AttributeName=id,AttributeType=S \
+      AttributeName=name,AttributeType=S \
+	  AttributeName=secret,AttributeType=S \
+  --key-schema \
+      AttributeName=id,KeyType=HASH \
+  --endpoint-url=http://localhost:4556 \
+  --region=us-east-1

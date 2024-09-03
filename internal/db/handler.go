@@ -12,9 +12,10 @@ import (
 )
 
 type VaultEntity struct {
-	ID     string `dynamodbav:"id"`
-	Name   string `dynamodbav:"name"`
-	Secret string `dynamodbav:"secret"`
+	ID          string `dynamodbav:"id"`
+	Name        string `dynamodbav:"name"`
+	Description string `dynamodbav:"description"`
+	Password    string `dynamodbav:"password"`
 }
 
 type VaultMetadata struct {
@@ -99,5 +100,5 @@ func (dbClient DynamoDBClient) GetItem(ctx context.Context, id string) (string, 
 		return "", err
 	}
 
-	return item.Secret, err
+	return item.Password, err
 }

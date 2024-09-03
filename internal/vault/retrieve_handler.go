@@ -1,20 +1,19 @@
 package vault
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"log/slog"
 	"net/http"
 	"personal-vault/internal/db"
-
-	"github.com/gin-gonic/gin"
 )
 
 type RetrieveHandler struct {
 	Client db.DynamoDBClient
 }
 
-func (h RetrieveHandler) ServeHTTP(c *gin.Context) {
-	slog.Info("enter retrieve")
+func (h RetrieveHandler) GetAll(c *gin.Context) {
+	slog.Info("enter get all")
 
 	items, err := h.Client.ScanItems(c)
 	if err != nil {
@@ -24,4 +23,20 @@ func (h RetrieveHandler) ServeHTTP(c *gin.Context) {
 
 	// return success/error
 	c.IndentedJSON(http.StatusOK, items)
+
+}
+
+func (h RetrieveHandler) GetByID(c *gin.Context) {
+	slog.Info("enter get by id")
+
+	id := c.Param("id")
+
+	item, err := h.Client.GetItem(c, id)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// return success/error
+	c.IndentedJSON(http.StatusOK, item)
 }

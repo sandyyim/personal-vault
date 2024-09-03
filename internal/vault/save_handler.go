@@ -16,8 +16,9 @@ type SaveHandler struct {
 }
 
 type Request struct {
-	Name   string `json:"name"`
-	Secret string `json:"secret"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Password    string `json:"password"`
 }
 
 func (h SaveHandler) ServeHTTP(c *gin.Context) {
@@ -35,9 +36,10 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 
 	// save into DB
 	vaultEntity := db.VaultEntity{
-		ID:     id,
-		Name:   request.Name,
-		Secret: request.Secret,
+		ID:          id,
+		Name:        request.Name,
+		Description: request.Description,
+		Password:    request.Password,
 	}
 
 	err := h.Client.InsertItem(c, vaultEntity)
