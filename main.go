@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"personal-vault/internal/db"
 	"personal-vault/internal/vault"
@@ -42,7 +43,9 @@ func main() {
 	svc := dynamodb.NewFromConfig(awsConfig)
 	dbClient := db.NewClient(svc)
 
-	saveHandler := vault.SaveHandler{Client: *dbClient}
+	validate := validator.New()
+
+	saveHandler := vault.SaveHandler{Client: *dbClient, Validate: validate}
 	retrieveHandler := vault.RetrieveHandler{Client: *dbClient}
 
 	router := gin.Default()

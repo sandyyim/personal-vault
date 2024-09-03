@@ -18,6 +18,7 @@ func (h RetrieveHandler) GetAll(c *gin.Context) {
 	items, err := h.Client.ScanItems(c)
 	if err != nil {
 		log.Println(err)
+		c.JSON(http.StatusInternalServerError, errorMessage)
 		return
 	}
 
@@ -34,6 +35,7 @@ func (h RetrieveHandler) GetByID(c *gin.Context) {
 	item, err := h.Client.GetItem(c, id)
 	if err != nil {
 		log.Println(err)
+		c.JSON(http.StatusInternalServerError, errorMessage)
 		return
 	}
 

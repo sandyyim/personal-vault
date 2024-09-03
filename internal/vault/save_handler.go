@@ -2,6 +2,7 @@ package vault
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"log"
 	"log/slog"
@@ -11,14 +12,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const errorMessage = "there is error"
+
 type SaveHandler struct {
-	Client db.DynamoDBClient
+	Client   db.DynamoDBClient
+	Validate *validator.Validate
 }
 
 type Request struct {
-	Name        string `json:"name"`
+	Name        string `json:"name" validate:"required"`
 	Description string `json:"description"`
-	Password    string `json:"password"`
+	Password    string `json:"password" validate:"required"`
 }
 
 func (h SaveHandler) ServeHTTP(c *gin.Context) {
@@ -29,6 +33,14 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 	// call BindJSON to bind the received JSON to request
 	if err := c.BindJSON(&request); err != nil {
 		log.Println(err)
+		c.JSON(http.StatusBadRequest, errorMessage)
+		return
+	}
+
+	err := h.Validate.Struct(request)
+	if err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, errorMessage)
 		return
 	}
 
@@ -42,9 +54,10 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 		Password:    request.Password,
 	}
 
-	err := h.Client.InsertItem(c, vaultEntity)
+	err = h.Client.InsertItem(c, vaultEntity)
 	if err != nil {
 		log.Println(err)
+		c.JSON(http.StatusInternalServerError, errorMessage)
 		return
 	}
 
