@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/go-playground/validator/v10"
 	"net/http"
+	"os"
 	"personal-vault/internal/db"
 	"personal-vault/internal/vault"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
@@ -40,6 +40,8 @@ func main() {
 		return
 	}
 
+	os.Setenv("AWS_ENDPOINT_URL_DYNAMODB", "http://localhost:8000")
+
 	svc := dynamodb.NewFromConfig(awsConfig)
 	dbClient := db.NewClient(svc)
 
@@ -63,6 +65,8 @@ func main() {
 	router.NoRoute(notFoundHandler)
 	router.NoMethod(notMethodHandler)
 
-	ginLambda = ginadapter.New(router)
-	lambda.Start(Handler)
+	err = router.Run("localhost:8080")
+	if err != nil {
+		return
+	}
 }

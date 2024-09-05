@@ -16,5 +16,9 @@ Resources:
             Method: get
             Path: /save
             Method: post
+            Path: /retrieve/all
+            Method: get
+            Path: /retrieve/:id
+            Method: get
   # MySqsQueue:
   #   Type: AWS::SQS::Queue

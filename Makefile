@@ -12,14 +12,8 @@ build-zip:
 	sleep 3
 	zip bootstrap.zip bootstrap
 
+start-db:
+	java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 
-aws dynamodb create-table \
-  --table-name personal-vault-dynamodb \
-  --attribute-definitions \
-      AttributeName=id,AttributeType=S \
-      AttributeName=name,AttributeType=S \
-	  AttributeName=secret,AttributeType=S \
-  --key-schema \
-      AttributeName=id,KeyType=HASH \
-  --endpoint-url=http://localhost:4556 \
-  --region=us-east-1
+create-table:
+	aws dynamodb create-table --endpoint-url "http://localhost:8000" --cli-input-json file://init-dynamodb.json
