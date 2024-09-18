@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/go-playground/validator/v10"
 	"net/http"
-	"os"
+	"personal-vault/internal/configuration"
 	"personal-vault/internal/db"
-	"personal-vault/internal/vault"
+	"personal-vault/internal/handler"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -34,21 +34,23 @@ func notMethodHandler(c *gin.Context) {
 }
 
 func main() {
+	cfg, err := configuration.LoadConfig()
+	if err != nil {
+		return
+	}
 
 	awsConfig, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return
 	}
 
-	os.Setenv("AWS_ENDPOINT_URL_DYNAMODB", "http://localhost:8000")
-
 	svc := dynamodb.NewFromConfig(awsConfig)
 	dbClient := db.NewClient(svc)
 
 	validate := validator.New()
 
-	saveHandler := vault.SaveHandler{Client: *dbClient, Validate: validate}
-	retrieveHandler := vault.RetrieveHandler{Client: *dbClient}
+	saveHandler := handler.SaveHandler{Client: *dbClient, Validate: validate, Key: cfg.Secret}
+	retrieveHandler := handler.RetrieveHandler{Client: *dbClient, Key: cfg.Secret}
 
 	router := gin.Default()
 

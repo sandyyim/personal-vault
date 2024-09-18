@@ -23,7 +23,7 @@ type VaultMetadata struct {
 	Name string `dynamodbav:"name"`
 }
 
-func (dbClient DynamoDBClient) InsertItem(ctx context.Context, vaultEntity VaultEntity) error {
+func (dbClient DynamoDBClient) PutItem(ctx context.Context, vaultEntity VaultEntity) error {
 	item, err := attributevalue.MarshalMap(vaultEntity)
 	if err != nil {
 		slog.Error("error", err)
