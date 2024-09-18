@@ -43,34 +43,47 @@ func LoadConfig() (Config, error) {
 			return cfg, err
 		}
 
-		cfg.Secret = secret
 		viper.Set("AWS_ENDPOINT_URL_DYNAMODB", "http://localhost:8000")
-		viper.Set("SECRET", secret)
+		viper.Set("SECRET", hex.EncodeToString(secret))
+		cfg.Secret = string(secret)
 
 		err = viper.WriteConfigAs(viper.ConfigFileUsed())
 		if err != nil {
 			slog.Error("error", err)
 			return cfg, err
 		}
+
+	} else {
+		secret, err := hex.DecodeString(cfg.Secret)
+		if err != nil {
+			slog.Error("error", err)
+			return cfg, err
+		}
+
+		cfg.Secret = string(secret)
+
 	}
 
 	return cfg, nil
 }
 
-func generateKey() (string, error) {
+func generateKey() ([]byte, error) {
 	fmt.Println("Please Enter Your Password: ")
 
-	var pw string
+	var (
+		pw  string
+		key []byte
+	)
 
 	fmt.Scanln(&pw)
 
 	salt := make([]byte, 32)
 	_, err := rand.Read(salt)
 	if err != nil {
-		return "", err
+		return key, err
 	}
 
-	key := pbkdf2.Key([]byte(pw), salt, 1, 32, sha256.New)
+	key = pbkdf2.Key([]byte(pw), salt, 1, 32, sha256.New)
 
-	return hex.EncodeToString(key), nil
+	return key, nil
 }
