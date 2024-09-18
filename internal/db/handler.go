@@ -12,9 +12,10 @@ import (
 )
 
 type VaultEntity struct {
-	ID     string `dynamodbav:"id"`
-	Name   string `dynamodbav:"name"`
-	Secret string `dynamodbav:"secret"`
+	ID          string `dynamodbav:"id"`
+	Name        string `dynamodbav:"name"`
+	Description string `dynamodbav:"description"`
+	Password    string `dynamodbav:"password"`
 }
 
 type VaultMetadata struct {
@@ -22,7 +23,7 @@ type VaultMetadata struct {
 	Name string `dynamodbav:"name"`
 }
 
-func (dbClient DynamoDBClient) InsertItem(ctx context.Context, vaultEntity VaultEntity) error {
+func (dbClient DynamoDBClient) PutItem(ctx context.Context, vaultEntity VaultEntity) error {
 	item, err := attributevalue.MarshalMap(vaultEntity)
 	if err != nil {
 		slog.Error("error", err)
@@ -99,5 +100,5 @@ func (dbClient DynamoDBClient) GetItem(ctx context.Context, id string) (string, 
 		return "", err
 	}
 
-	return item.Secret, err
+	return item.Password, err
 }

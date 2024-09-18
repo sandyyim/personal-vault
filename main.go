@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/go-playground/validator/v10"
 	"net/http"
+	"personal-vault/internal/configuration"
 	"personal-vault/internal/db"
-	"personal-vault/internal/vault"
+	"personal-vault/internal/handler"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
@@ -33,6 +34,10 @@ func notMethodHandler(c *gin.Context) {
 }
 
 func main() {
+	cfg, err := configuration.LoadConfig()
+	if err != nil {
+		return
+	}
 
 	awsConfig, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
@@ -42,9 +47,10 @@ func main() {
 	svc := dynamodb.NewFromConfig(awsConfig)
 	dbClient := db.NewClient(svc)
 
-	saveHandler := vault.SaveHandler{Client: *dbClient}
-	scanHandler := vault.ScanHandler{Client: *dbClient}
-	getHandler := vault.GetHandler{Client: *dbClient}
+	validate := validator.New()
+
+	saveHandler := handler.SaveHandler{Client: *dbClient, Validate: validate, Key: cfg.Secret}
+	retrieveHandler := handler.RetrieveHandler{Client: *dbClient, Key: cfg.Secret}
 
 	router := gin.Default()
 
@@ -52,13 +58,17 @@ func main() {
 
 	router.POST("/save", saveHandler.ServeHTTP)
 
-	router.POST("/getall", scanHandler.ServeHTTP)
-
-	router.POST("/get", getHandler.ServeHTTP)
+	retrieve := router.Group("/retrieve")
+	{
+		retrieve.GET("/all", retrieveHandler.GetAll)
+		retrieve.GET("/:id", retrieveHandler.GetByID)
+	}
 
 	router.NoRoute(notFoundHandler)
 	router.NoMethod(notMethodHandler)
 
-	ginLambda = ginadapter.New(router)
-	lambda.Start(Handler)
+	err = router.Run("localhost:8080")
+	if err != nil {
+		return
+	}
 }

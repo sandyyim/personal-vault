@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	tableName = "personal-vault-dynamodb"
+	tableName = "personal-vault"
 )
 
 type DynamoDBAPI interface {
