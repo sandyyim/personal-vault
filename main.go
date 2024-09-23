@@ -3,23 +3,16 @@ package main
 import (
 	"context"
 	"github.com/go-playground/validator/v10"
+	"log/slog"
 	"net/http"
 	"personal-vault/internal/configuration"
 	"personal-vault/internal/db"
 	"personal-vault/internal/handler"
 
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/gin-gonic/gin"
 )
-
-var ginLambda *ginadapter.GinLambda
-
-func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return ginLambda.ProxyWithContext(ctx, request)
-}
 
 func healthcheckHandler(c *gin.Context) {
 	c.String(http.StatusOK, "Hello World!")
@@ -36,6 +29,7 @@ func notMethodHandler(c *gin.Context) {
 func main() {
 	cfg, err := configuration.LoadConfig()
 	if err != nil {
+		slog.Error("error", err)
 		return
 	}
 

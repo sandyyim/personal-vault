@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
-	"log"
 	"log/slog"
 	"net/http"
 	"personal-vault/internal/db"
@@ -35,21 +34,27 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 
 	// call BindJSON to bind the received JSON to request
 	if err := c.BindJSON(&request); err != nil {
-		log.Println(err)
+		slog.Error("error", err)
 		c.JSON(http.StatusBadRequest, errorMessage)
 		return
 	}
 
 	err := h.Validate.Struct(request)
 	if err != nil {
-		log.Println(err)
+		slog.Error("error", err)
 		c.JSON(http.StatusBadRequest, errorMessage)
 		return
 	}
 
 	id := uuid.NewString()
 
-	encryptedPassword := encryption.Encrypt(request.Password, h.Key)
+	encryptedPassword, err := encryption.Encrypt(request.Password, h.Key)
+	if err != nil {
+		slog.Error("error", err)
+		c.JSON(http.StatusInternalServerError, errorMessage)
+		return
+	}
+
 	encodedPassword := b64.StdEncoding.EncodeToString([]byte(encryptedPassword))
 
 	vaultEntity := db.VaultEntity{
@@ -61,7 +66,7 @@ func (h SaveHandler) ServeHTTP(c *gin.Context) {
 
 	err = h.Client.PutItem(c, vaultEntity)
 	if err != nil {
-		log.Println(err)
+		slog.Error("error", err)
 		c.JSON(http.StatusInternalServerError, errorMessage)
 		return
 	}

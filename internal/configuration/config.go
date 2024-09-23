@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/pbkdf2"
-	"log/slog"
 	"os"
 )
 
@@ -24,22 +23,22 @@ func LoadConfig() (Config, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		slog.Error("error", err)
 		return cfg, err
 	}
 
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
-		slog.Error("error", err)
 		return cfg, err
 	}
 
-	os.Setenv("AWS_ENDPOINT_URL_DYNAMODB", cfg.DBUrl)
+	err = os.Setenv("AWS_ENDPOINT_URL_DYNAMODB", cfg.DBUrl)
+	if err != nil {
+		return cfg, err
+	}
 
 	if len(cfg.Secret) == 0 {
 		secret, err := generateKey()
 		if err != nil {
-			slog.Error("error", err)
 			return cfg, err
 		}
 
@@ -49,14 +48,12 @@ func LoadConfig() (Config, error) {
 
 		err = viper.WriteConfigAs(viper.ConfigFileUsed())
 		if err != nil {
-			slog.Error("error", err)
 			return cfg, err
 		}
 
 	} else {
 		secret, err := hex.DecodeString(cfg.Secret)
 		if err != nil {
-			slog.Error("error", err)
 			return cfg, err
 		}
 
@@ -75,10 +72,13 @@ func generateKey() ([]byte, error) {
 		key []byte
 	)
 
-	fmt.Scanln(&pw)
+	_, err := fmt.Scanln(&pw)
+	if err != nil {
+		return nil, err
+	}
 
 	salt := make([]byte, 32)
-	_, err := rand.Read(salt)
+	_, err = rand.Read(salt)
 	if err != nil {
 		return key, err
 	}

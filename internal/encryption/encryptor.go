@@ -6,24 +6,24 @@ import (
 	"crypto/rand"
 )
 
-func Encrypt(plaintext, secretKey string) string {
-	aes, err := aes.NewCipher([]byte(secretKey))
+func Encrypt(plaintext, secretKey string) (string, error) {
+	block, err := aes.NewCipher([]byte(secretKey))
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	gcm, err := cipher.NewGCM(aes)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
 	_, err = rand.Read(nonce)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	
+
 	ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
 
-	return string(ciphertext)
+	return string(ciphertext), nil
 }
