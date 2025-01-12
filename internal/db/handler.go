@@ -7,8 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"log"
-	"log/slog"
 )
 
 type VaultEntity struct {
@@ -26,7 +24,6 @@ type VaultMetadata struct {
 func (dbClient DynamoDBClient) PutItem(ctx context.Context, vaultEntity VaultEntity) error {
 	item, err := attributevalue.MarshalMap(vaultEntity)
 	if err != nil {
-		slog.Error("error", err)
 		return err
 	}
 
@@ -37,7 +34,6 @@ func (dbClient DynamoDBClient) PutItem(ctx context.Context, vaultEntity VaultEnt
 
 	_, err = dbClient.API.PutItem(ctx, input)
 	if err != nil {
-		slog.Error("error", err)
 		return err
 	}
 
@@ -54,7 +50,6 @@ func (dbClient DynamoDBClient) ScanItems(ctx context.Context) ([]VaultMetadata, 
 
 	output, err := dbClient.API.Scan(ctx, input)
 	if err != nil {
-		slog.Error("error", err)
 		return nil, err
 	}
 
@@ -64,7 +59,7 @@ func (dbClient DynamoDBClient) ScanItems(ctx context.Context) ([]VaultMetadata, 
 		err = attributevalue.UnmarshalMap(i, &metadata)
 
 		if err != nil {
-			log.Fatalf("Got error unmarshalling: %s", err)
+			return nil, err
 		}
 
 		metadatas = append(metadatas, metadata)
@@ -83,12 +78,10 @@ func (dbClient DynamoDBClient) GetItem(ctx context.Context, id string) (string, 
 
 	output, err := dbClient.API.GetItem(ctx, input)
 	if err != nil {
-		slog.Error("error", err)
 		return "", err
 	}
 
 	if output.Item == nil {
-		slog.Error("error", err)
 		return "", errors.New("unable to find the record")
 	}
 
@@ -96,7 +89,6 @@ func (dbClient DynamoDBClient) GetItem(ctx context.Context, id string) (string, 
 
 	err = attributevalue.UnmarshalMap(output.Item, &item)
 	if err != nil {
-		slog.Error("error", err)
 		return "", err
 	}
 

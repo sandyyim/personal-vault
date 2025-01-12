@@ -5,15 +5,15 @@ import (
 	"crypto/cipher"
 )
 
-func Decrypt(ciphertext, secretKey string) string {
-	aes, err := aes.NewCipher([]byte(secretKey))
+func Decrypt(ciphertext, secretKey string) (string, error) {
+	block, err := aes.NewCipher([]byte(secretKey))
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	gcm, err := cipher.NewGCM(aes)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	nonceSize := gcm.NonceSize()
@@ -24,5 +24,5 @@ func Decrypt(ciphertext, secretKey string) string {
 		panic(err)
 	}
 
-	return string(plaintext)
+	return string(plaintext), nil
 }
