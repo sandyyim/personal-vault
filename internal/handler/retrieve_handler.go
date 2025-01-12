@@ -3,6 +3,7 @@ package handler
 import (
 	b64 "encoding/base64"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"log/slog"
 	"net/http"
 	"personal-vault/internal/db"
@@ -33,6 +34,12 @@ func (h RetrieveHandler) GetByID(c *gin.Context) {
 
 	id := c.Param("id")
 
+	if !isValidUUID(id) {
+		slog.Error("error", slog.String("validation error", "invalid id"))
+		c.JSON(http.StatusBadRequest, errorMessage)
+		return
+	}
+
 	item, err := h.Client.GetItem(c, id)
 	if err != nil {
 		slog.Error("error", err)
@@ -54,5 +61,10 @@ func (h RetrieveHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, password)
+	c.String(http.StatusOK, password)
+}
+
+func isValidUUID(u string) bool {
+	_, err := uuid.Parse(u)
+	return err == nil
 }

@@ -39,9 +39,9 @@ func TestDynamoDBClient_PutItem(t *testing.T) {
 			name: "success case",
 			vaultEntity: VaultEntity{
 				ID:          "001",
-				Name:        "TestName",
-				Description: "TestDescr.",
-				Password:    "TestPassword",
+				Name:        "testName",
+				Description: "testDescr.",
+				Password:    "testPassword",
 			},
 			putItem: func(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
 				return &dynamodb.PutItemOutput{}, nil
@@ -52,9 +52,9 @@ func TestDynamoDBClient_PutItem(t *testing.T) {
 			name: "error case",
 			vaultEntity: VaultEntity{
 				ID:          "001",
-				Name:        "TestName",
-				Description: "TestDescr.",
-				Password:    "TestPassword",
+				Name:        "testName",
+				Description: "testDescr.",
+				Password:    "testPassword",
 			},
 			putItem: func(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
 				return nil, errors.New("this is mock error")
@@ -88,9 +88,9 @@ func TestDynamoDBClient_ScanItems(t *testing.T) {
 
 	item = map[string]types.AttributeValue{
 		"ID":          &types.AttributeValueMemberS{Value: "001"},
-		"Name":        &types.AttributeValueMemberS{Value: "TestName"},
-		"Description": &types.AttributeValueMemberS{Value: "TestDescr."},
-		"Password":    &types.AttributeValueMemberS{Value: "TestPassword"},
+		"Name":        &types.AttributeValueMemberS{Value: "testName"},
+		"Description": &types.AttributeValueMemberS{Value: "testDescr."},
+		"Password":    &types.AttributeValueMemberS{Value: "testPassword"},
 	}
 
 	items = append(items, item)
@@ -144,9 +144,9 @@ func TestDynamoDBClient_GetItem(t *testing.T) {
 
 	item := map[string]types.AttributeValue{
 		"ID":          &types.AttributeValueMemberS{Value: "001"},
-		"Name":        &types.AttributeValueMemberS{Value: "TestName"},
-		"Description": &types.AttributeValueMemberS{Value: "TestDescr."},
-		"Password":    &types.AttributeValueMemberS{Value: "TestPassword"},
+		"Name":        &types.AttributeValueMemberS{Value: "testName"},
+		"Description": &types.AttributeValueMemberS{Value: "testDescr."},
+		"Password":    &types.AttributeValueMemberS{Value: "testPassword"},
 	}
 
 	tests := []struct {
@@ -195,7 +195,7 @@ func TestDynamoDBClient_GetItem(t *testing.T) {
 				assert.Equal(t, err, tt.expectedErr)
 				assert.Empty(t, password)
 			} else {
-				assert.Equal(t, password, "TestPassword")
+				assert.Equal(t, password, "testPassword")
 			}
 
 		})

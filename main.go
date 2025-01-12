@@ -50,7 +50,7 @@ func main() {
 
 	router.GET("/healthcheck", healthcheckHandler)
 
-	router.POST("/save", saveHandler.ServeHTTP)
+	router.POST("/save", saveHandler.AddItem)
 
 	retrieve := router.Group("/retrieve")
 	{

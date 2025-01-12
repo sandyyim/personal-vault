@@ -27,7 +27,7 @@ type Request struct {
 	Password    string `json:"password" validate:"required"`
 }
 
-func (h SaveHandler) ServeHTTP(c *gin.Context) {
+func (h SaveHandler) AddItem(c *gin.Context) {
 	slog.Info("enter save")
 
 	var request Request
